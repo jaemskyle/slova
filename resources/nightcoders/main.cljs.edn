@@ -1,0 +1,1 @@
+{:require [nightcoders.muzt nightlight.repl-server], :init-fns [], :compiler-options {:infer-externs true}}

@@ -1,0 +1,45 @@
+html {
+    font-size: 16px;
+}
+
+.cards {
+  padding: 10px;
+  float: left;
+  list-style-type: none;
+}
+
+
+.list-item {
+  list-style-type: none;
+  opacity: 0.3;
+}
+
+
+
+.list-item:hover {
+  background: gold; 
+  opacity: 1;
+  color: #222;
+  font-size: 20px;
+  padding: 10px;
+}
+
+
+
+.list-item.selected {
+  background: #aaa; 
+  opacity: 1;
+  color: #222;
+  font-size: 20px;
+  padding: 10px;
+}
+
+.wotd {
+  font-size: 20px;
+}
+
+.wotd li {
+  display: block;
+  padding: 5px;
+}
+
