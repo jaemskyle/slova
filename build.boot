@@ -7,7 +7,9 @@
                    :exclusions [org.clojure/clojure]]
                   [nightlight "1.9.2"]
                   [org.clojure/clojurescript "1.9.946"]
-                  [reagent "0.6.0"]])
+                  [reagent "0.6.0"]
+                  [org.clojure/clojure "1.8.0"] 
+                  [org.clojure/core.async "0.3.465"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]

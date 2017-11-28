@@ -1,13 +1,35 @@
 (ns nightcoders.muzt
   (:require [reagent.core :as r]
             [nightcoders.data :refer [slova]]
-            [clojure.string :as cs]))
+            [clojure.string :as cs]
+            [cljs.core.async :refer [<! >!] :as a]
+            [goog.net.XhrIo :as xhr])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
   
-
 (def clicks (r/atom 0))
 (def words (r/atom slova))
-(def vocabs (r/atom (-> (.parse js/JSON (.getItem js/sessionStorage "yo"))
-                        (js->clj :keywordize-keys true))))
+(def vocabs (r/atom {}))
+
+;; (def vocabs (r/atom (-> (.parse js/JSON (.getItem js/sessionStorage "yo"))
+;;                         (js->clj :keywordize-keys true))))
+
+(defn GET [url fnn]
+  (xhr/send url
+            (fn [event]
+              (let [s (-> event .-target .getResponseText)]
+                (fnn s)))))
+
+(defn get-item [item fn]
+  (let [href (aget js/window "location" "href")]
+    (GET (str href item) fn)))
+
+
+(get-item "backup - 2017:05:02-232203.json"
+          (fn [s]
+            (swap! vocabs
+                   (fn [] (-> (.parse js/JSON s)
+                        (js->clj :keywordize-keys true))))))
+
                         
                         
 (def qword (r/atom ""))
@@ -31,40 +53,10 @@
 (defn word-item [w]
   [:span (:word w)])
 
-(def char-map {"а" "88"})
-               
-
-(defn encr [w]
-  (-> (str w)
-      (cs/replace "а" "99")
-      (cs/replace "ж" "9")
-      (cs/replace "т" "1")
-      (cs/replace "о" "3")
-      (cs/replace "у" "2")
-      (cs/replace "е" "12-")
-      (cs/replace "й" "52")
-      (cs/replace "ы" "66")
-      (cs/replace "н" "32")))
-
-    
-
-
-(defn testing []
-  (let [s (.getItem js/sessionStorage "yo")]
-    (let [o (-> (.parse js/JSON s)
-                (js->clj :keywordize-keys true)
-                (:lists)
-                (first)
-                (:name))]
-
-      (console.log js/document "aget" @vocabs)
-    
-      [:div @vocabs])))
-
 
 (defn words-of-the-day [vocabulary]
   [:ul.wotd
-    (for [i (:lists @vocabulary)]
+   (for [i (:lists @vocabulary)]
         (let [item (get (:list i) (rand (count (:list i))))]
           (swap! col-selected (fn [] (conj @col-selected (:word item))))
           [:li
@@ -105,7 +97,7 @@
     (fn []
       [:ul.card-holder 
        {:style @cards-style-root} 
-       (doall (for [list cards]
+       (doall (for [list (:lists @cards)]
                 ^{:key list} [:li.cards 
                               
                               [:h4 {:style (:title @style)} (:name list)]  
@@ -126,11 +118,52 @@
 ;;                (swap! cards-style (fn [] (assoc @cards-style :background "white")))))])))
 
 
+
+(defn encr [w]
+  (-> (str w)
+      (cs/replace "а" "99")
+      (cs/replace "ж" "9")
+      (cs/replace "т" "1")
+      (cs/replace "о" "3")
+      (cs/replace "у" "2")
+      (cs/replace "е" "12-")
+      (cs/replace "й" "52")
+      (cs/replace "ы" "66")
+      (cs/replace "н" "32")))
+
+    
+
+
+(defn testing []
+  (let [s (.getItem js/sessionStorage "yo")]
+    (let [o (-> (.parse js/JSON s)
+                (js->clj :keywordize-keys true)
+                (:lists)
+                (first)
+                (:name))]
+
+      (console.log (aget js/window "location" "href") @vocabs)
+      
+      [:div (aget js/window "location")])))
+
+
+(defn testing-element []
+  (let [s (str "backup - 2017:05:02-232203.json")
+        href (aget js/window "location" "href")]
+
+    [:div
+     [:div (str href s)]
+     [:div (.stringify js/JSON (aget js/window "location"))]]))
+
+
+
+
+
 (defn content []
   [:div
    [words-of-the-day vocabs]     
    [info qword]
-   [cards (:lists @vocabs)]])
+   [cards vocabs]])
 
 (r/render-component [content] (.querySelector js/document "#content"))
 
